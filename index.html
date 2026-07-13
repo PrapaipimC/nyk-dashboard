@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NYK Wallet Share — Tracking Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1 id="project-name">NYK Wallet Share — โครงการ 3 เดือน</h1>
+      <p id="last-updated"></p>
+    </header>
+
+    <div class="progress-wrap">
+      <div class="progress-labels">
+        <span>ความคืบหน้าโครงการ</span>
+        <span id="progress-count">0 / 12 งาน (0%)</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div class="board" id="board"></div>
+
+    <footer>
+      ข้อมูลบันทึกในเบราว์เซอร์ของแต่ละคน (localStorage) — ดูวิธีอัปเดตให้ทีมเห็นตรงกันใน README.md
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

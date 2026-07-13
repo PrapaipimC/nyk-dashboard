@@ -1,0 +1,18 @@
+{
+  "projectName": "NYK Wallet Share — โครงการ 3 เดือน",
+  "lastUpdated": "2026-07-13",
+  "tasks": [
+    { "id": "w1", "week": 1, "phase": "เดือนที่ 1", "title": "Kick-off + กำหนดขอบเขต", "owner": "Data/Innovation lead", "deliverable": "Project charter + รายชื่อแบรนด์", "status": "todo" },
+    { "id": "w2", "week": 2, "phase": "เดือนที่ 1", "title": "เก็บข้อมูล NYG Wallet Share", "owner": "Data team + NYG", "deliverable": "ข้อมูลดิบครบทุกแบรนด์", "status": "todo" },
+    { "id": "w3", "week": 3, "phase": "เดือนที่ 1", "title": "เก็บมูลค่าผ้า NYK + validate", "owner": "NYK Sales", "deliverable": "ข้อมูล NYK fabric value", "status": "todo" },
+    { "id": "w4", "week": 4, "phase": "เดือนที่ 1", "title": "กรอก Excel + รัน Gap Matrix แรก", "owner": "Data/Innovation lead", "deliverable": "Gap Matrix ฉบับแรก", "status": "todo" },
+    { "id": "w5", "week": 5, "phase": "เดือนที่ 2", "title": "ระบุ Root Cause เบื้องต้น", "owner": "Innovation + Sales", "deliverable": "Root Cause Tracker", "status": "todo" },
+    { "id": "w6", "week": 6, "phase": "เดือนที่ 2", "title": "เก็บ Price Benchmark", "owner": "NYG Purchasing", "deliverable": "ตาราง Price Benchmark", "status": "todo" },
+    { "id": "w7", "week": 7, "phase": "เดือนที่ 2", "title": "ปรับ threshold โมเดล", "owner": "Data lead", "deliverable": "โมเดลเวอร์ชันปรับปรุง", "status": "todo" },
+    { "id": "w8", "week": 8, "phase": "เดือนที่ 2", "title": "ประชุมทบทวนกับผู้บริหาร", "owner": "ทั้งทีม", "deliverable": "Priority list ฉบับอนุมัติ", "status": "todo" },
+    { "id": "w9", "week": 9, "phase": "เดือนที่ 3", "title": "กำหนด Dashboard requirement", "owner": "Data lead", "deliverable": "เอกสาร requirement", "status": "todo" },
+    { "id": "w10", "week": 10, "phase": "เดือนที่ 3", "title": "เชื่อมข้อมูลเข้าระบบ", "owner": "Data engineer/IT", "deliverable": "Data pipeline อัตโนมัติ", "status": "todo" },
+    { "id": "w11", "week": 11, "phase": "เดือนที่ 3", "title": "สร้าง Dashboard v1 + ทดสอบ", "owner": "Data lead", "deliverable": "Dashboard v1", "status": "todo" },
+    { "id": "w12", "week": 12, "phase": "เดือนที่ 3", "title": "เปิดใช้งานจริง + อบรมทีม", "owner": "Data lead + ทั้งทีม", "deliverable": "Dashboard ใช้งานจริง", "status": "todo" }
+  ]
+}

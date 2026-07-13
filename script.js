@@ -1,4 +1,8 @@
-const STORAGE_KEY = "nyk-dashboard-state-v1";
+const SUPABASE_URL = "https://vfzntwsmpwyhfwxvjqew.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZmem50d3NtcHd5aGZ3eHZqcWV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5MjQyMzYsImV4cCI6MjA5OTUwMDIzNn0.K_H4MYLH66vufssnhB0nspOiy5-_1OiR45KLzktG3Ik";
+
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 const STATUSES = [
   { key: "todo", label: "ต้องทำ" },
   { key: "doing", label: "กำลังทำ" },
@@ -6,41 +10,85 @@ const STATUSES = [
 ];
 
 let tasks = [];
+let currentUser = null;
 
 async function init() {
-  const res = await fetch("data.json");
-  const data = await res.json();
-  document.getElementById("project-name").textContent = data.projectName;
-  document.getElementById("last-updated").textContent = "อัปเดตข้อมูลล่าสุด: " + data.lastUpdated;
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  currentUser = session?.user || null;
+  renderAuthBar();
 
-  const saved = localStorage.getItem(STORAGE_KEY);
-  const savedState = saved ? JSON.parse(saved) : {};
-
-  tasks = data.tasks.map(t => ({
-    ...t,
-    status: savedState[t.id] || t.status || "todo",
-  }));
-
+  await loadTasks();
   render();
+
+  supabaseClient.auth.onAuthStateChange((_event, session) => {
+    currentUser = session?.user || null;
+    renderAuthBar();
+    render();
+  });
+
+  supabaseClient
+    .channel("tasks-changes")
+    .on("postgres_changes", { event: "*", schema: "public", table: "tasks" }, () => {
+      loadTasks().then(render);
+    })
+    .subscribe();
 }
 
-function saveState() {
-  const state = {};
-  tasks.forEach(t => { state[t.id] = t.status; });
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+async function loadTasks() {
+  const { data, error } = await supabaseClient.from("tasks").select("*").order("week");
+  if (error) {
+    console.error(error);
+    return;
+  }
+  tasks = data;
 }
 
-function moveTask(id, dir) {
+function renderAuthBar() {
+  const bar = document.getElementById("auth-bar");
+  if (currentUser) {
+    const name = currentUser.user_metadata?.user_name || currentUser.email;
+    const avatar = currentUser.user_metadata?.avatar_url;
+    bar.innerHTML = `
+      <div class="auth-user">
+        ${avatar ? `<img src="${avatar}" alt="${name}" />` : ""}
+        <span>${name}</span>
+        <button id="logout-btn">ออกจากระบบ</button>
+      </div>
+    `;
+    document.getElementById("logout-btn").onclick = () => supabaseClient.auth.signOut();
+  } else {
+    bar.innerHTML = `<button id="login-btn">Login with GitHub</button>`;
+    document.getElementById("login-btn").onclick = () =>
+      supabaseClient.auth.signInWithOAuth({ provider: "github", options: { redirectTo: window.location.href } });
+  }
+}
+
+async function moveTask(id, dir) {
+  if (!currentUser) return;
   const task = tasks.find(t => t.id === id);
   const idx = STATUSES.findIndex(s => s.key === task.status);
   const newIdx = idx + dir;
   if (newIdx < 0 || newIdx >= STATUSES.length) return;
-  task.status = STATUSES[newIdx].key;
-  saveState();
+
+  const newStatus = STATUSES[newIdx].key;
+  const { error } = await supabaseClient
+    .from("tasks")
+    .update({ status: newStatus, updated_at: new Date().toISOString() })
+    .eq("id", id);
+  if (error) {
+    console.error(error);
+    return;
+  }
+  await loadTasks();
   render();
 }
 
 function render() {
+  const lastUpdated = tasks.reduce((max, t) => (t.updated_at > max ? t.updated_at : max), "");
+  document.getElementById("last-updated").textContent = lastUpdated
+    ? "อัปเดตข้อมูลล่าสุด: " + new Date(lastUpdated).toLocaleString("th-TH")
+    : "";
+
   const board = document.getElementById("board");
   board.innerHTML = "";
 
@@ -62,11 +110,13 @@ function render() {
         card.className = "card";
         const idx = STATUSES.findIndex(s => s.key === col.key);
         let btns = "";
-        if (idx > 0) {
-          btns += `<button onclick="moveTask('${t.id}', -1)">&larr; ย้อนกลับ</button>`;
-        }
-        if (idx < STATUSES.length - 1) {
-          btns += `<button onclick="moveTask('${t.id}', 1)">ถัดไป &rarr;</button>`;
+        if (currentUser) {
+          if (idx > 0) {
+            btns += `<button onclick="moveTask('${t.id}', -1)">&larr; ย้อนกลับ</button>`;
+          }
+          if (idx < STATUSES.length - 1) {
+            btns += `<button onclick="moveTask('${t.id}', 1)">ถัดไป &rarr;</button>`;
+          }
         }
         card.innerHTML = `
           <div class="week">สัปดาห์ ${t.week} · ${t.phase}</div>

@@ -9,6 +9,7 @@
 <body>
   <div class="container">
     <header>
+      <div class="auth-bar" id="auth-bar"></div>
       <h1 id="project-name">NYK Wallet Share — โครงการ 3 เดือน</h1>
       <p id="last-updated"></p>
     </header>
@@ -26,10 +27,11 @@
     <div class="board" id="board"></div>
 
     <footer>
-      ข้อมูลบันทึกในเบราว์เซอร์ของแต่ละคน (localStorage) — ดูวิธีอัปเดตให้ทีมเห็นตรงกันใน README.md
+      ข้อมูล sync แบบ real-time ให้ทุกคนเห็นตรงกัน — ต้อง login ด้วย GitHub ก่อนถึงจะอัปเดตสถานะได้
     </footer>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="script.js"></script>
 </body>
 </html>

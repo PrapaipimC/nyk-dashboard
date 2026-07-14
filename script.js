@@ -107,11 +107,35 @@ function formatDateTime(iso) {
   return new Date(iso).toLocaleString("th-TH");
 }
 
-function isOverdue(task) {
-  if (!task.due_date || task.status === "done") return false;
+function daysOverdue(task) {
+  if (!task.due_date || task.status === "done") return 0;
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  return new Date(task.due_date + "T00:00:00") < today;
+  const due = new Date(task.due_date + "T00:00:00");
+  return Math.floor((today - due) / 86400000);
+}
+
+function isOverdue(task) {
+  return daysOverdue(task) > 0;
+}
+
+function renderOverdueBanner() {
+  const banner = document.getElementById("overdue-banner");
+  const severe = tasks
+    .filter(t => daysOverdue(t) > 3)
+    .sort((a, b) => daysOverdue(b) - daysOverdue(a));
+
+  if (!severe.length) {
+    banner.style.display = "none";
+    banner.innerHTML = "";
+    return;
+  }
+
+  const list = severe
+    .map(t => `${escapeHtml(t.title)} (เลยกำหนด ${daysOverdue(t)} วัน)`)
+    .join(" · ");
+  banner.style.display = "block";
+  banner.innerHTML = `⚠️ มี ${severe.length} งานเลยกำหนดส่งเกิน 3 วันแล้ว: ${list}`;
 }
 
 function findTask(id) {
@@ -377,6 +401,8 @@ function render() {
   document.getElementById("last-updated").textContent = lastUpdated
     ? "อัปเดตข้อมูลล่าสุด: " + new Date(lastUpdated).toLocaleString("th-TH")
     : "";
+
+  renderOverdueBanner();
 
   if (currentView === "board") {
     renderBoard();

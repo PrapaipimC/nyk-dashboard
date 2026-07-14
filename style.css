@@ -58,6 +58,16 @@ header p {
   margin: 0 0 1.5rem;
 }
 
+.overdue-banner {
+  background: #C0392B;
+  color: #fff;
+  font-size: 13px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
 .progress-wrap { margin-bottom: 2rem; }
 .progress-labels {
   display: flex;

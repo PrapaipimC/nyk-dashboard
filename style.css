@@ -78,6 +78,31 @@ header p {
   transition: width .3s ease;
 }
 
+.add-task-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 1.5rem;
+}
+.add-task-form input {
+  flex: 1 1 180px;
+  font-size: 13px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-family: inherit;
+}
+.add-task-form button {
+  font-size: 13px;
+  padding: 8px 14px;
+  border: 1px solid var(--navy);
+  background: var(--navy);
+  color: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.add-task-form button:hover { opacity: 0.9; }
+
 .board {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -121,6 +146,8 @@ header p {
   cursor: pointer;
 }
 .card button:hover { background: var(--bg); }
+.card button.delete-btn { color: #B3261E; border-color: #E8B4B0; }
+.card button.delete-btn:hover { background: #FBEAE9; }
 
 footer {
   margin-top: 2rem;

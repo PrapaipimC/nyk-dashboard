@@ -16,6 +16,7 @@ async function init() {
   const { data: { session } } = await supabaseClient.auth.getSession();
   currentUser = session?.user || null;
   renderAuthBar();
+  renderAddTaskPanel();
 
   await loadTasks();
   render();
@@ -23,6 +24,7 @@ async function init() {
   supabaseClient.auth.onAuthStateChange((_event, session) => {
     currentUser = session?.user || null;
     renderAuthBar();
+    renderAddTaskPanel();
     render();
   });
 
@@ -61,6 +63,66 @@ function renderAuthBar() {
     document.getElementById("login-btn").onclick = () =>
       supabaseClient.auth.signInWithOAuth({ provider: "github", options: { redirectTo: window.location.href } });
   }
+}
+
+function escapeHtml(str) {
+  const div = document.createElement("div");
+  div.textContent = str ?? "";
+  return div.innerHTML;
+}
+
+function renderAddTaskPanel() {
+  const panel = document.getElementById("add-task-panel");
+  if (!currentUser) {
+    panel.innerHTML = "";
+    return;
+  }
+  panel.innerHTML = `
+    <form id="add-task-form" class="add-task-form">
+      <input type="text" id="new-task-title" placeholder="ชื่องาน" required />
+      <input type="text" id="new-task-owner" placeholder="ผู้รับผิดชอบ (ไม่บังคับ)" />
+      <input type="text" id="new-task-deliverable" placeholder="สิ่งที่ต้องส่งมอบ (ไม่บังคับ)" />
+      <button type="submit">+ เพิ่มงาน</button>
+    </form>
+  `;
+  document.getElementById("add-task-form").addEventListener("submit", addTask);
+}
+
+async function addTask(e) {
+  e.preventDefault();
+  const title = document.getElementById("new-task-title").value.trim();
+  if (!title) return;
+  const owner = document.getElementById("new-task-owner").value.trim() || null;
+  const deliverable = document.getElementById("new-task-deliverable").value.trim() || null;
+
+  const { error } = await supabaseClient.from("tasks").insert({
+    id: crypto.randomUUID(),
+    title,
+    owner,
+    deliverable,
+    status: "todo",
+  });
+  if (error) {
+    console.error(error);
+    alert("เพิ่มงานไม่สำเร็จ: " + error.message);
+    return;
+  }
+  e.target.reset();
+  await loadTasks();
+  render();
+}
+
+async function deleteTask(id) {
+  if (!currentUser) return;
+  if (!confirm("ต้องการลบงานนี้ใช่ไหม?")) return;
+  const { error } = await supabaseClient.from("tasks").delete().eq("id", id);
+  if (error) {
+    console.error(error);
+    alert("ลบไม่สำเร็จ: " + error.message);
+    return;
+  }
+  await loadTasks();
+  render();
 }
 
 async function moveTask(id, dir) {
@@ -104,7 +166,7 @@ function render() {
 
     tasks
       .filter(t => t.status === col.key)
-      .sort((a, b) => a.week - b.week)
+      .sort((a, b) => (a.week ?? 9999) - (b.week ?? 9999))
       .forEach(t => {
         const card = document.createElement("div");
         card.className = "card";
@@ -117,12 +179,16 @@ function render() {
           if (idx < STATUSES.length - 1) {
             btns += `<button onclick="moveTask('${t.id}', 1)">ถัดไป &rarr;</button>`;
           }
+          btns += `<button class="delete-btn" onclick="deleteTask('${t.id}')">ลบ</button>`;
         }
+        const meta = t.week
+          ? `สัปดาห์ ${t.week}${t.phase ? " · " + escapeHtml(t.phase) : ""}`
+          : escapeHtml(t.phase || "งานเพิ่มเติม");
         card.innerHTML = `
-          <div class="week">สัปดาห์ ${t.week} · ${t.phase}</div>
-          <div class="title">${t.title}</div>
-          <div class="owner">${t.owner}</div>
-          <div class="deliverable">${t.deliverable}</div>
+          <div class="week">${meta}</div>
+          <div class="title">${escapeHtml(t.title)}</div>
+          ${t.owner ? `<div class="owner">${escapeHtml(t.owner)}</div>` : ""}
+          ${t.deliverable ? `<div class="deliverable">${escapeHtml(t.deliverable)}</div>` : ""}
           <div class="actions">${btns}</div>
         `;
         colDiv.appendChild(card);
